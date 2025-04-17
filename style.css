@@ -1,0 +1,315 @@
+/* --- Global Styles & Variables --- */
+:root {
+    --primary-color: #e74c3c; /* Vibrant Red */
+    --secondary-color: #f39c12; /* Vibrant Orange */
+    --accent-color: #2ecc71; /* Vibrant Green */
+    --text-color: #333;
+    --bg-color-light: #fff8f0; /* Light Creamy Background */
+    --bg-color-dark: #d9a168; /* Darker shade for contrast */
+    --stone-bg: #b0a090; /* Stone color */
+    --stone-border: #7a6a5a;
+    --path-color: #dcdcdc; /* Light grey path */
+    --progress-gradient: linear-gradient(180deg, var(--secondary-color), var(--primary-color));
+    --glow-color: rgba(243, 156, 18, 0.8); /* Orange glow */
+
+    --marker-size: 60px;
+    --path-width: 10px;
+    --event-spacing: 180px; /* Vertical space between events */
+    --animation-duration: 15s; /* Total time for the bar to fill */
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color-light);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align to top for scrolling */
+    min-height: 100vh;
+    padding: 40px 20px;
+    box-sizing: border-box;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* Optional decorative background pattern */
+.background-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(rgba(217, 161, 104, 0.1) 1px, transparent 1px);
+    background-size: 15px 15px;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+h1 {
+    text-align: center;
+    font-family: 'Satisfy', cursive; /* More decorative font for title */
+    color: var(--primary-color);
+    font-size: 3em;
+    margin-bottom: 40px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+/* --- Timeline Container --- */
+.timeline-container {
+    max-width: 800px;
+    width: 100%;
+}
+
+.timeline {
+    position: relative;
+    padding: 20px 0;
+    margin: 0 auto; /* Center timeline elements */
+    width: 100%; /* Take available width */
+}
+
+/* --- Path & Progress Bar --- */
+.timeline-path,
+.timeline-progress {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--path-width);
+    top: calc(var(--marker-size) / 2); /* Start below the first marker center */
+    bottom: calc(var(--marker-size) / 2); /* End above the last marker center */
+    border-radius: calc(var(--path-width) / 2);
+    z-index: 1;
+}
+
+.timeline-path {
+    background-color: var(--path-color);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.timeline-progress {
+    background: var(--progress-gradient);
+    height: 0; /* Initially hidden */
+    /* CSS animation controlled by JS */
+    transition: height var(--animation-duration) linear;
+    box-shadow: 0 0 8px rgba(231, 76, 60, 0.5); /* Subtle glow for the bar itself */
+}
+
+/* --- Events List --- */
+.events-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative; /* To position list items */
+    z-index: 2; /* Above the path/progress */
+}
+
+/* --- Individual Event --- */
+.timeline-event {
+    position: relative;
+    width: calc(50% - 50px); /* Adjust width as needed */
+    margin-bottom: var(--event-spacing); /* Vertical spacing */
+    display: flex; /* Use flex for alignment */
+    align-items: center; /* Vertically center marker and details */
+}
+
+/* Position events alternating sides */
+.timeline-event:nth-child(odd) {
+    left: 0;
+    padding-left: 20px; /* Space from edge */
+    justify-content: flex-start; /* Align content to the left */
+    text-align: left;
+}
+
+.timeline-event:nth-child(even) {
+    left: calc(50% + 50px);
+    padding-right: 20px; /* Space from edge */
+    justify-content: flex-end; /* Align content to the right */
+    text-align: right;
+}
+.timeline-event:nth-child(even) .event-details {
+    order: -1; /* Move details before the marker visually */
+    margin-right: 20px;
+    margin-left: 0;
+}
+
+
+/* --- Event Marker --- */
+.event-marker-wrapper {
+    position: absolute;
+    top: 0; /* Align with the top of the list item */
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--marker-size);
+    height: var(--marker-size);
+    z-index: 3; /* Above path/progress */
+}
+
+.event-marker {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: var(--stone-bg);
+    border: 4px solid var(--stone-border);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2); /* Stone effect */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: default; /* Default cursor */
+}
+
+/* --- Event Details --- */
+.event-details {
+    background: rgba(255, 255, 255, 0.8); /* Slightly transparent white background */
+    backdrop-filter: blur(5px); /* Frosted glass effect */
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.1);
+    flex-grow: 1; /* Allow details to take space */
+    margin-left: 20px; /* Space between marker line and details */
+}
+
+.timeline-event:nth-child(even) .event-details {
+     margin-right: 20px; /* Space for right-aligned events */
+     margin-left: 0;
+}
+
+
+.event-details h2 {
+    margin: 0 0 5px 0;
+    font-size: 1.2em;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.event-details p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* --- Active & Hover States --- */
+.timeline-event.active .event-marker {
+    background-color: var(--secondary-color); /* Highlight color */
+    border-color: darken(var(--secondary-color), 15%);
+    box-shadow: 0 0 15px 5px var(--glow-color), 0 3px 8px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2); /* Glow effect */
+    transform: scale(1.1); /* Slightly larger */
+    cursor: pointer; /* Make active markers clickable/hoverable */
+}
+
+/* Hover effect only for ACTIVE markers */
+.timeline-event.active .event-marker:hover {
+    transform: scale(1.15); /* Enlarge slightly more on hover */
+    box-shadow: 0 0 25px 8px var(--glow-color), 0 3px 8px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2); /* Intense glow */
+}
+
+/* Adjust marker position relative to path for odd/even */
+.timeline-event:nth-child(odd) .event-marker-wrapper {
+    /* Already centered */
+}
+.timeline-event:nth-child(even) .event-marker-wrapper {
+   /* Already centered */
+}
+
+
+/* Connector line from marker center to details (pseudo-element) */
+.timeline-event::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--marker-size) / 2); /* Vertically center with marker */
+    height: 3px; /* Line thickness */
+    background-color: var(--path-color); /* Match path color initially */
+    z-index: 0; /* Behind marker, above background */
+    transition: background-color 0.5s ease; /* Smooth color change */
+}
+
+/* Style connector for odd (left) events */
+.timeline-event:nth-child(odd)::before {
+    left: calc(50% + var(--marker-size) / 2 - 2px); /* Start just right of marker */
+    right: calc(50% - 50px - 15px); /* End just left of details padding */
+    /* Adjust 'right' based on detail box width/margins if needed */
+}
+
+/* Style connector for even (right) events */
+.timeline-event:nth-child(even)::before {
+    right: calc(50% + var(--marker-size) / 2 - 2px); /* Start just left of marker */
+    left: calc(50% - 50px - 15px); /* End just right of details padding */
+     /* Adjust 'left' based on detail box width/margins if needed */
+}
+
+
+/* Change connector color when active */
+.timeline-event.active::before {
+   background: var(--progress-gradient); /* Match progress bar */
+}
+
+
+/* Ensure last event doesn't have huge margin below */
+.timeline-event:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 600px) {
+    body {
+        padding: 20px 10px;
+    }
+
+    h1 {
+        font-size: 2.2em;
+    }
+
+    .timeline-path,
+    .timeline-progress {
+        left: 35px; /* Move path to the left */
+        transform: none;
+    }
+
+    .timeline-event,
+    .timeline-event:nth-child(even) {
+        left: 0; /* All events align left */
+        width: calc(100% - 70px); /* Adjust width */
+        margin-left: 70px; /* Space from the path */
+        padding-left: 15px;
+        padding-right: 0;
+        text-align: left;
+         justify-content: flex-start;
+    }
+
+    .timeline-event:nth-child(even) .event-details {
+        order: 1; /* Details after marker */
+        margin-left: 15px;
+        margin-right: 0;
+    }
+
+     .event-marker-wrapper {
+        left: -35px; /* Position marker over the path */
+        transform: none;
+     }
+
+
+    /* Adjust connector lines for mobile layout */
+     .timeline-event::before {
+        left: calc(-35px + var(--marker-size)/2); /* Start from marker center */
+        right: auto; /* Remove right constraint */
+        width: calc(35px + 15px - var(--marker-size)/2); /* To edge of details padding */
+     }
+     .timeline-event:nth-child(even)::before {
+        left: calc(-35px + var(--marker-size)/2);
+        right: auto;
+        width: calc(35px + 15px - var(--marker-size)/2);
+     }
+
+
+    .event-details {
+        margin-left: 15px; /* Consistent margin */
+    }
+
+     :root {
+        --event-spacing: 150px; /* Reduce spacing on mobile */
+     }
+  }

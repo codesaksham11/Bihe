@@ -4,72 +4,281 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nepali Marriage Timeline</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Satisfy&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        :root {
+            --bg-color: #f0f4f8; /* Light background */
+            --path-bg: #d8e2ec; /* Lighter path background */
+            --path-fill-start: #4caf50; /* Green */
+            --path-fill-end: #8bc34a; /* Lighter Green */
+            --level-bg-start: #6a1b9a; /* Purple */
+            --level-bg-end: #ab47bc; /* Lighter Purple */
+            --level-border: #4a148c; /* Darker Purple */
+            --level-text: #ffffff;
+            --glow-color: #ffeb3b; /* Yellow glow */
+            --level-size: 80px; /* Size of the circle */
+            --path-width: 15px; /* Width of the connecting path */
+            --animation-segment-duration: 1500ms; /* Time for fill to travel between levels */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for scrolling */
+            min-height: 100vh;
+            padding: 50px 20px;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        .timeline-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px; /* Limit width */
+            padding-top: calc(var(--level-size) / 2); /* Start below the center of the first level */
+            padding-bottom: calc(var(--level-size) / 2); /* End above the center of the last level */
+        }
+
+        /* The background track for the path */
+        .path-background {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0; /* Start from the very top */
+            bottom: 0; /* Extend to the very bottom */
+            width: var(--path-width);
+            background-color: var(--path-bg);
+            border-radius: calc(var(--path-width) / 2);
+            z-index: 1;
+            height: 100%; /* Make sure it spans the container */
+        }
+
+        /* The animated filling element */
+        .path-fill {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0; /* Start filling from the top */
+            width: var(--path-width);
+            height: 0; /* Start with no height */
+            background: linear-gradient(to bottom, var(--path-fill-start), var(--path-fill-end));
+            border-radius: calc(var(--path-width) / 2);
+            z-index: 2;
+            transition: height var(--animation-segment-duration) linear; /* Smooth height transition */
+        }
+
+        .level {
+            position: relative; /* Crucial for positioning and z-index */
+            display: flex;
+            align-items: center;
+            margin-bottom: 100px; /* Space between levels */
+            z-index: 3; /* Ensure levels are above the path */
+            /* Stagger levels slightly for visual interest */
+        }
+
+        .level:nth-child(odd) {
+            justify-content: flex-start; /* Circle left, text right */
+            padding-left: calc(50% + var(--level-size) / 2 + 10px); /* Position text */
+        }
+        .level:nth-child(even) {
+            justify-content: flex-end; /* Circle right, text left */
+            padding-right: calc(50% + var(--level-size) / 2 + 10px); /* Position text */
+        }
+         .level:last-child {
+            margin-bottom: 0; /* No margin for the last item */
+         }
+
+
+        .level-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the circle on the path line */
+            width: var(--level-size);
+            height: var(--level-size);
+            background: linear-gradient(135deg, var(--level-bg-start), var(--level-bg-end));
+            border-radius: 50%;
+            border: 4px solid var(--level-border);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -3px 4px rgba(0, 0, 0, 0.2); /* Bulge effect */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px; /* Adjusted font size */
+            color: var(--level-text);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions for hover and glow */
+            line-height: 1.2; /* Improve text wrapping */
+            padding: 5px; /* Add padding inside circle */
+            box-sizing: border-box; /* Include padding/border in size */
+        }
+
+        .level-text {
+             font-size: 14px;
+             font-weight: 600;
+             color: #333;
+             background: rgba(255, 255, 255, 0.8);
+             padding: 8px 12px;
+             border-radius: 8px;
+             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+             backdrop-filter: blur(2px); /* Optional: blurry background */
+             max-width: 150px; /* Limit text width */
+             text-align: center;
+        }
+        .level-text span:first-child {
+            display: block; /* Event name on its own line */
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+         .level-text span:last-child {
+            font-size: 12px;
+            color: #555;
+         }
+
+
+        .level-circle:hover {
+            transform: translate(-50%, -50%) scale(1.1); /* Slightly larger on hover */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -3px 4px rgba(0, 0, 0, 0.2), 0 0 20px var(--glow-color); /* Add glow on hover too */
+        }
+
+        /* Glow effect for when the level is reached */
+        .level-circle.glow {
+            box-shadow: 0 0 25px 10px var(--glow-color), 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -3px 4px rgba(0, 0, 0, 0.2); /* Strong glow */
+            transform: translate(-50%, -50%) scale(1.05); /* Slight pulse */
+        }
+
+        /* Button to restart animation */
+        .restart-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: var(--level-bg-start);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            z-index: 100;
+        }
+        .restart-button:hover {
+             background-color: var(--level-bg-end);
+        }
+
+    </style>
 </head>
 <body>
-    <div class="background-pattern"></div>
-    <div class="timeline-container">
-        <h1>Nepali Marriage Journey</h1>
-        <div class="timeline">
-            <!-- The visible path line (background) -->
-            <div class="timeline-path"></div>
-            <!-- The animated progress bar -->
-            <div class="timeline-progress"></div>
 
-            <!-- Events List -->
-            <ul class="events-list">
-                <li class="timeline-event" data-event-id="1">
-                    <div class="event-marker-wrapper">
-                         <div class="event-marker" id="event-1">1</div>
-                    </div>
-                    <div class="event-details">
-                        <h2>Roti Banauda</h2>
-                        <p>Baisakh 2</p>
-                    </div>
-                </li>
-                <li class="timeline-event event-right" data-event-id="2">
-                     <div class="event-marker-wrapper">
-                        <div class="event-marker" id="event-2">2</div>
-                     </div>
-                    <div class="event-details">
-                        <h2>Puja</h2>
-                        <p>Baisakh 2</p>
-                    </div>
-                </li>
-                <li class="timeline-event" data-event-id="3">
-                     <div class="event-marker-wrapper">
-                        <div class="event-marker" id="event-3">3</div>
-                     </div>
-                    <div class="event-details">
-                        <h2>Haldi</h2>
-                        <p>Baisakh 2</p>
-                    </div>
-                </li>
-                <li class="timeline-event event-right" data-event-id="4">
-                     <div class="event-marker-wrapper">
-                        <div class="event-marker" id="event-4">4</div>
-                     </div>
-                    <div class="event-details">
-                        <h2>Mandir ma Bihe</h2>
-                        <p>Baisakh 3</p>
-                    </div>
-                </li>
-                <li class="timeline-event" data-event-id="5">
-                    <div class="event-marker-wrapper">
-                         <div class="event-marker" id="event-5">5</div>
-                    </div>
-                    <div class="event-details">
-                        <h2>Rati ko Nach</h2>
-                        <p>Baisakh 3</p>
-                    </div>
-                </li>
-            </ul>
+    <div class="timeline-container" id="timelineContainer">
+        <!-- Path elements will be positioned absolutely -->
+        <div class="path-background"></div>
+        <div class="path-fill" id="pathFill"></div>
+
+        <!-- Event Levels -->
+        <div class="level" data-level="1">
+            <div class="level-circle" id="circle-1">1</div>
+            <div class="level-text"><span>Roti Banauda</span><span>Baisakh 2</span></div>
         </div>
+
+        <div class="level" data-level="2">
+             <div class="level-text"><span>Puja</span><span>Baisakh 2</span></div>
+             <div class="level-circle" id="circle-2">2</div>
+        </div>
+
+        <div class="level" data-level="3">
+            <div class="level-circle" id="circle-3">3</div>
+             <div class="level-text"><span>Haldi</span><span>Baisakh 2</span></div>
+        </div>
+
+        <div class="level" data-level="4">
+             <div class="level-text"><span>Mandir ma Bihe</span><span>Baisakh 3</span></div>
+             <div class="level-circle" id="circle-4">4</div>
+        </div>
+
+        <div class="level" data-level="5">
+            <div class="level-circle" id="circle-5">5</div>
+             <div class="level-text"><span>Rati ko Nach</span><span>Baisakh 3</span></div>
+        </div>
+        <!-- Add more levels as needed -->
+
     </div>
 
-    <script src="script.js"></script>
+    <button class="restart-button" onclick="startAnimation()">Restart Animation</button>
+
+    <script>
+        const timelineContainer = document.getElementById('timelineContainer');
+        const pathFill = document.getElementById('pathFill');
+        const levels = Array.from(document.querySelectorAll('.level'));
+        const levelCircles = Array.from(document.querySelectorAll('.level-circle'));
+        const animationSegmentDuration = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--animation-segment-duration')) || 1500; // Get from CSS
+
+        function getLevelPosition(levelElement) {
+            // Calculate the vertical center position of the level circle relative to the timeline container
+            const circle = levelElement.querySelector('.level-circle');
+            // Get position of the level container relative to the viewport
+            const levelRect = levelElement.getBoundingClientRect();
+            // Get position of the timeline container relative to the viewport
+            const containerRect = timelineContainer.getBoundingClientRect();
+            // Calculate the top offset of the level *within* the container
+            const levelTopInContainer = levelRect.top - containerRect.top;
+            // Target height is the center of the circle within the container
+            return levelTopInContainer + (circle.offsetHeight / 2);
+        }
+
+        function resetAnimation() {
+            pathFill.style.transition = 'none'; // Disable transition for reset
+            pathFill.style.height = '0px';
+            levelCircles.forEach(circle => circle.classList.remove('glow'));
+            // Force reflow to apply the reset immediately before re-enabling transition
+            void pathFill.offsetWidth;
+            pathFill.style.transition = `height ${animationSegmentDuration}ms linear`; // Re-enable
+        }
+
+        async function startAnimation() {
+            resetAnimation();
+
+            // Small delay before starting to ensure reset is applied
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            // Start with the first level glowing immediately
+            const firstLevelCircle = document.getElementById('circle-1');
+             if (firstLevelCircle) {
+                 firstLevelCircle.classList.add('glow');
+             }
+
+
+            for (let i = 0; i < levels.length; i++) {
+                const currentLevel = levels[i];
+                const targetHeight = getLevelPosition(currentLevel);
+
+                // Set the target height for the fill animation
+                pathFill.style.height = `${targetHeight}px`;
+
+                // Wait for the CSS transition to complete for this segment
+                await new Promise(resolve => setTimeout(resolve, animationSegmentDuration));
+
+                // Ensure the current level's circle is glowing (in case it wasn't the first)
+                const currentCircle = currentLevel.querySelector('.level-circle');
+                if (currentCircle) {
+                    currentCircle.classList.add('glow');
+                }
+
+                 // Optional: Keep previous glows or remove them
+                 // If you want only the current one to glow:
+                 // levelCircles.forEach((circle, index) => {
+                 //    if (index !== i) circle.classList.remove('glow');
+                 // });
+            }
+             console.log("Animation Complete");
+        }
+
+        // Start the animation automatically on load
+        window.addEventListener('load', startAnimation);
+
+    </script>
+
 </body>
 </html>
